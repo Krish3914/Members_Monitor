@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import { apiURL } from "./utils/commonData";
@@ -57,7 +57,7 @@ const EnterOtp = () => {
   }, []);
 
   return (
-    <div className="w-full h-screen bg-purple-400 flex items-center justify-center" > 
+    <div className="w-full h-screen bg-purple-400 flex items-center justify-center">
       <div className="bg-white w-1/3 flex flex-col items-center gap-6 p-4 shadow-lg rounded-md">
         <div>Verify</div>
         <div>Your Code Was Sent To You Via Mail</div>
@@ -86,7 +86,10 @@ const EnterOtp = () => {
         </button>
         <div>
           Didn't Receive Code{" "}
-          <span className="text-[#696cff] cursor-pointer">Send Again?</span>
+          <span className="text-[#696cff] cursor-pointer">
+            {" "}
+            <Link to={"/forgotpassword"}>Send Again?</Link>
+          </span>
         </div>
       </div>
       <ToastContainer />

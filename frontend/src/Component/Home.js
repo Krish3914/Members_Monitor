@@ -93,7 +93,7 @@ const Home = () => {
                 <span>MEMBERS RECORD</span>
                 <h1>GYM MANAGER</h1>
                 <p>
-                  Manage your fitness club members pricisely and totally free
+                  Manage your fitness club members precisely and totally free
                 </p>
                 <Link to={"/signup"} className="primary-btn">
                   Get Started
@@ -437,8 +437,8 @@ const Home = () => {
                 <h2 className="mi-price">Free</h2>
                 <ul>
                   <li>
-                    <p>Duration</p>
-                    <span>12 months</span>
+                    <p>Membership Overdue Alert</p>
+                    <span>NO</span>
                   </li>
                   <li>
                     <p>Employee Management</p>
@@ -472,8 +472,8 @@ const Home = () => {
                 </h2>
                 <ul>
                   <li>
-                    <p>Duration</p>
-                    <span>12 months</span>
+                    <p>Membership Overdue Alert</p>
+                    <span>NO</span>
                   </li>
                   <li>
                     <p>Employee Management</p>
@@ -507,8 +507,8 @@ const Home = () => {
                 </h2>
                 <ul>
                   <li>
-                    <p>Duration</p>
-                    <span>12 months</span>
+                    <p>Membership Overdue Alert</p>
+                    <span>NO</span>
                   </li>
                   <li>
                     <p>Employee Management</p>
@@ -542,8 +542,8 @@ const Home = () => {
                 </h2>
                 <ul>
                   <li>
-                    <p>Duration</p>
-                    <span>12 months</span>
+                    <p>Membership Overdue Alert</p>
+                    <span>YES</span>
                   </li>
                   <li>
                     <p>Employee Management</p>
@@ -621,11 +621,13 @@ const Home = () => {
             <div className="col-lg-6">
               <div
                 className="footer-banner-item set-bh"
-                data-setbg="img/banner-bg.jpg"
+                data-setbg="./kimage/"
                 // data-setbg="../images/img/footer-banner/footer-banner-1.jpg"
               >
                 <span>New member</span>
-                <h2>Generate INVOICE</h2>
+                <span>
+                  <h2 id="colorr">Generate INVOICE</h2>
+                </span>
                 <p>
                   For First 12 months You Can Enjoy All Features with Zero Costs
                 </p>

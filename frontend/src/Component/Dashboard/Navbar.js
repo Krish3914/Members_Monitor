@@ -165,9 +165,11 @@ import { apiURL } from "../utils/commonData"; // Adjust the import path as neces
 import Dashboard from "./Dashboard";
 import OrderStatistics from "./OrderStatistics";
 import FinanceStatistics from "./FinanceStatistics";
+import {Spinner} from "../Spinner";
 import TransactionsList from "./TransactionsList";
 
 export const Navbar = () => {
+  const [loader, setLoader] = useState(false);
   const dispatch = useDispatch();
   const userName = useSelector((state) => state.user.userData.name);
   const role = useSelector((state) => state?.user?.userData?.role);
@@ -206,7 +208,7 @@ export const Navbar = () => {
 
   const cardClass = "bg-white rounded-lg p-2 flex flex-col gap-2";
 
-  return (
+  return loader?<Spinner/>:(
     <div className="" onClick={() => dispatch(makeInvisible(false))}>
       <div className="flex flex-col gap-5">
         <div className="flex gap-7">

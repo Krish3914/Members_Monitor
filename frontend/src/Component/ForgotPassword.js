@@ -63,8 +63,7 @@ export const ForgotPassword = () => {
           <label htmlFor="email" className="text-sm opacity-60">EMAIL</label>
           <input type="text" id="email" placeholder="Enter Your Email" className="p-2  rounded-md border-2" value={email} onChange={handleMailChange}/>
           <button className="bg-[#696cff] shadow-lg text-white p-2 rounded-lg font-bold text-center " onClick={sendOtp}>Send OTP to registered email ID</button>
-          <Link to={"/login"} className="mx-auto">
-
+          <Link to={"/login"} className="mx-auto">Back to Login
           </Link>
         </div>
       </div>

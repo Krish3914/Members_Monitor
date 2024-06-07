@@ -214,7 +214,9 @@ ul, ol {
 *===================================*/
 
 
-
+#leftshift{
+	padding-left: 8px;
+}
 .section-title h2 {
 	color: #111111;
 	font-size: 40px;
@@ -232,15 +234,21 @@ ul, ol {
     background-position: center center;
 }
 .set-bh {
-	background-image: url("../img/kimage/fb2.jpg");
+	background-image: url("../img/kimage/fb3.png");
+	background-image: url("../img/kimage/imgg.jpg");
+	color: black;
 	background-repeat: no-repeat;
 	background-size: cover;
 	/* or contain, depending on your requirements */
 	background-position: center center;
 }
+#colorr{
+	color: #0f3e97;
+}
 
 .set-bh1 {
 	background-image: url("../img/kimage/fb1.jpg");
+	background-image: url("../img/kimage/img1.jpg");
 	background-repeat: no-repeat;
 	background-size: cover;
 	/* or contain, depending on your requirements */
@@ -992,13 +1000,15 @@ ul, ol {
 }
 .footer-banner-item h2 {
 	font-size: 40px;
-	color: #ffffff;
+	/* color: #ffffff; */
+	color: #0f3e97;
 	font-weight: 600;
-	margin-top: 30px;
+	margin-top: 20px;
 	margin-bottom: 5px;
 }
 .footer-banner-item p {
-	color: #ffffff;
+	/* color: #ffffff; */
+	color: darkred;
 	margin-bottom: 42px;
 }
 /*---------------------

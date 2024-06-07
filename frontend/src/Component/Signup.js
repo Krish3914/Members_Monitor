@@ -8,7 +8,8 @@ import { IoEyeOutline } from "react-icons/io5";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { apiURL } from "./utils/commonData";
 import isValidEmail from "./utils/validEmail";
-import {Spinner} from "./Spinner"
+import {Spinner} from "./Spinner";
+import { IoClose } from "react-icons/io5";
 
 export const Signup = () => {
   const [shouldSpin,setShouldSpin] = useState(false);
@@ -29,6 +30,10 @@ export const Signup = () => {
       isAgreeTerms:false
     })
   }
+
+  const handleClose = () => {
+    navigate("/"); // Navigate to the home page
+  };
 
   const createUser = async (data)=>{
     setShouldSpin(true);
@@ -86,10 +91,12 @@ export const Signup = () => {
     }
   }
   
-  return shouldSpin?<Spinner/>:(
+  return shouldSpin ? (
+    <Spinner />
+  ) : (
     <div className="h-screen bg-slate-100 flex justify-center  lg:items-center overflow-hidden">
       <form className="h-[90vh] sm:w-1/2 lg:w-1/3 xl:w-3/12 mt-4 flex flex-col gap-4 rounded-lg bg-white px-4 py-2 w-10/12">
-          <img src={iconImage} className=" w-1/2 mx-auto"/>
+        <img src={iconImage} className=" w-1/2 mx-auto" />
         <div className="flex flex-col gap-1">
           <span className="text-xl opacity-80 tracking-wide font-medium">
             Adventure starts here 🚀
@@ -126,22 +133,38 @@ export const Signup = () => {
           <label htmlFor="pass">Password</label>
 
           <div className="relative">
-          <input
-            type={!showPassword?"password":"text"}
-            id="pass"
-            name="password"
-            value={signupData.password}
-            placeholder="Enter your Password"
-            className="border-2 p-2 rounded-md w-full" 
-            onChange={changeHandle}
-          />
-          {showPassword?<IoEyeOutline className="absolute right-3 top-3 text-[#696cff] cursor-pointer text-xl" onClick={()=>setshowPassword(!showPassword)}/>:<FaRegEyeSlash className="absolute right-3 top-3 text-[#696cff] cursor-pointer text-xl" onClick={()=>setshowPassword(!showPassword)}/>}
-      
+            <input
+              type={!showPassword ? "password" : "text"}
+              id="pass"
+              name="password"
+              value={signupData.password}
+              placeholder="Enter your Password"
+              className="border-2 p-2 rounded-md w-full"
+              onChange={changeHandle}
+            />
+            {showPassword ? (
+              <IoEyeOutline
+                className="absolute right-3 top-3 text-[#696cff] cursor-pointer text-xl"
+                onClick={() => setshowPassword(!showPassword)}
+              />
+            ) : (
+              <FaRegEyeSlash
+                className="absolute right-3 top-3 text-[#696cff] cursor-pointer text-xl"
+                onClick={() => setshowPassword(!showPassword)}
+              />
+            )}
           </div>
-
         </div>
         <div className="flex gap-2 font-light">
-          <input value={signupData.isAgreeTerms} checked={signupData.isAgreeTerms} name="isAgreeTerms" type="checkbox" id="isAgreeTerms" className="w-4 rounded-md" onChange={changeHandle}/>
+          <input
+            value={signupData.isAgreeTerms}
+            checked={signupData.isAgreeTerms}
+            name="isAgreeTerms"
+            type="checkbox"
+            id="isAgreeTerms"
+            className="w-4 rounded-md"
+            onChange={changeHandle}
+          />
           <label htmlFor="isAgreeTerms">
             I agree to{" "}
             <span className="cursor-pointer text-[#696cff] font-bold">
@@ -149,7 +172,10 @@ export const Signup = () => {
             </span>{" "}
           </label>
         </div>
-        <button className="bg-[#696cff] shadow-lg text-white p-2 rounded-lg font-bold text-center " onClick={signupHandle}>
+        <button
+          className="bg-[#696cff] shadow-lg text-white p-2 rounded-lg font-bold text-center "
+          onClick={signupHandle}
+        >
           {" "}
           Sign Up
         </button>
@@ -160,6 +186,12 @@ export const Signup = () => {
           </span>
         </div>
       </form>
+      <button
+        className="absolute top-5 right-5 text-4xl text-gray-500 hover:text-gray-700 cursor-pointer"
+        onClick={handleClose}
+      >
+        <IoClose />
+      </button>
       <ToastContainer />
     </div>
   );

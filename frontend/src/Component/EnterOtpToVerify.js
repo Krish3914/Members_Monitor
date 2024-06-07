@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import { apiURL } from "./utils/commonData";
@@ -61,12 +61,43 @@ const EnterOtpToVerify = () => {
     }
   };
 
+  const resendOTP = async () => {
+    try {
+      setShouldSpin(true);
+      await axios.post(`${apiURL}resendotp`, { email });
+      setShouldSpin(false);
+      toast.success("OTP Resent Successfully");
+    } catch (err) {
+      setShouldSpin(false);
+      console.log(err.message);
+      toast.error("Failed to resend OTP. Please try again.");
+    }
+  };
+  // const resendOTP = async () => {
+  //   try {
+  //     setShouldSpin(true);
+  //     await axios.post(`${apiURL}resendotp`, { email });
+  //     setShouldSpin(false);
+  //     toast.success("OTP Resent Successfully");
+  //   } catch (err) {
+  //     setShouldSpin(false);
+  //     if (err.response && err.response.status === 404) {
+  //       toast.error("Endpoint not found. Please check the URL.");
+  //     } else {
+  //       console.log(err.message);
+  //       toast.error("Failed to resend OTP. Please try again.");
+  //     }
+  //   }
+  // };
+
   useEffect(() => {
     toast.success("OTP Sent Successfully");
   }, []);
 
-  return !{shouldSpin}?<Spinner/>:(
-    <div className="w-full h-screen bg-purple-400 flex items-center justify-center" > 
+  return !{ shouldSpin } ? (
+    <Spinner />
+  ) : (
+    <div className="w-full h-screen bg-purple-400 flex items-center justify-center">
       <div className="bg-white w-1/3 flex flex-col items-center gap-6 p-4 shadow-lg rounded-md">
         <div>Verify Your Email</div>
         <div>Your Code Was Sent To You Via Mail</div>
@@ -95,7 +126,9 @@ const EnterOtpToVerify = () => {
         </button>
         <div>
           Didn't Receive Code{" "}
-          <span className="text-[#696cff] cursor-pointer">Send Again?</span>
+          <span className="text-[#696cff] cursor-pointer" onClick={resendOTP}>
+             Send Again?
+          </span>
         </div>
       </div>
       <ToastContainer />
@@ -104,3 +137,5 @@ const EnterOtpToVerify = () => {
 };
 
 export { EnterOtpToVerify };
+
+//<Link to={"/forgotpassword"}>Send Again?</Link>
