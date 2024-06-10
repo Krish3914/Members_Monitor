@@ -85,8 +85,8 @@ const UserProfile = () => {
     }
 
     try {
-      if(selectImage.size>50000){
-        return toast.error("image size should be less than 21kb");
+      if (selectImage.size > 50000) {
+        return toast.error("image size should be less than 45kb");
       }
       const convertedImage = await convertToBase64(selectImage);
       // setLoading(true);
@@ -113,14 +113,21 @@ const UserProfile = () => {
     }
   };
 
-  return user === undefined || loading? (
-    <Spinner/>
+  return user === undefined || loading ? (
+    <Spinner />
   ) : (
-    <div className="flex flex-col gap-5 h-screen" onClick={()=>dispatch(makeInvisible(false))}>
+    <div
+      className="flex flex-col gap-5 h-screen"
+      onClick={() => dispatch(makeInvisible(false))}
+    >
       <div className="flex w-full gap-8">
         <img
-          src={!user?.photo ? `https://ui-avatars.com/api/?name=${user?.name}` : user?.photo}
-          className="w-1/12 rounded-full"
+          src={
+            !user?.photo
+              ? `https://ui-avatars.com/api/?name=${user?.name}`
+              : user?.photo
+          }
+          className="w-1/12 rounded"
         />
         <div className="flex flex-col gap-4 ">
           <div className="flex mt-4 gap-2 items-center">
@@ -132,7 +139,7 @@ const UserProfile = () => {
               onChange={changeImageHandle}
             />
             <button
-              className="border py-1 border-gray-400 rounded-lg px-5 text-gray-400 hover:bg-purple-300 hover:text-white duration-500"
+              className="bg-green-600 text-center font-medium w-3/12 p-1 rounded-lg opacity-90 text-white shadow-lg"
               onClick={uploadImage}
             >
               Update image
@@ -163,7 +170,7 @@ const UserProfile = () => {
         />
         <label htmlFor="phone">PHONE</label>
         <input
-         maxLength={10}
+          maxLength={10}
           className="border border-gray-300  hover:border-purple-500 transition duration-300 bg-transparent p-2 rounded-md w-1/2"
           readOnly={!isreadOnly}
           id="phone"

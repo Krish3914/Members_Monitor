@@ -180,7 +180,7 @@ const OrderStatistics = ({ userData }) => {
     };
 
     const data = {
-        labels: ['One Month', 'Three Months', 'Six Months', 'One Year'],
+        labels: ['1 Month', '3 Months', '6 Months', '1 Year'],
         datasets: [
             {
                 data: [membershipCounts.oneMonth, membershipCounts.threeMonths, membershipCounts.sixMonths, membershipCounts.oneYear], 

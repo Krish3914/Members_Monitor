@@ -1,3 +1,256 @@
+// export { Table }; // Named export of the Tables component
+import { ToastContainer, toast } from "react-toastify";
+import { ShimmerTable } from "../leftDashBoard/ShimmerTable";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { addClient } from "../../redux/clientSlice";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { apiURL } from "../../utils/commonData";
+import { makeInvisible } from "../../redux/TemplateSlice";
+
+const Table = () => {
+  const selector = useSelector((store) => store.client.client);
+  const ownerId = useSelector((store) => store.user.userData?._id);
+  const dispatch = useDispatch();
+  const [dropdownVisible, setDropdownVisible] = useState(null);
+
+  const [userData, setUserdata] = useState(selector);
+  const [isReadonly, setIsReadonly] = useState(true);
+  const [totalRows, setTotalRows] = useState(0);
+  const [editIndex, setEditIndex] = useState(-1); // Track the index being edited
+
+  const getClients = async () => {
+    try {
+      const result = await axios.get(`${apiURL}clients/${ownerId}`, {
+        params: {
+          ownerId: ownerId,
+        },
+      });
+      const { message } = result.data;
+      dispatch(addClient(message));
+      if (!result) {
+        throw new Error(`error throw with status response`);
+      }
+      toast.success("Fetch The Users Data");
+
+      // Check if message contains the amount field
+      if (message.length > 0 && !message[0].hasOwnProperty("amount")) {
+        console.error("The 'amount' field is missing in the API response");
+      }
+    } catch (err) {
+      toast.error("Error Occurred while Fetching users data");
+    }
+  };
+
+  const handleDeleteUser = async (index) => {
+    if (userData[index] && userData[index]._id) {
+      // Check if userData[index] exists and has _id property
+      const id = userData[index]._id;
+      try {
+        await axios.delete(`${apiURL}deleteclient/${id}`);
+        const updatedUsers = [...userData];
+        updatedUsers.splice(index, 1);
+        setUserdata(updatedUsers);
+        toast.success("User deleted successfully");
+      } catch (err) {
+        console.log(err.message);
+      }
+    } else {
+      console.log("User data or _id property is undefined");
+    }
+  };
+
+  const handleInputChange = (index, key, value) => {
+    setUserdata((prevUserData) => {
+      const updatedUserData = [...prevUserData];
+      updatedUserData[index] = { ...updatedUserData[index], [key]: value };
+      return updatedUserData;
+    });
+  };
+
+  const handleSave = async (index) => {
+    setIsReadonly(true); // Disable editing after save
+    const { _id, name, dateOfBirth, email, gymPlan, amount, phone } = userData[index];
+    try {
+      await axios.put(`${apiURL}updateclient`, {
+        _id,
+        name,
+        dateOfBirth,
+        email,
+        gymPlan,
+        amount,
+        phone,
+      });
+      toast.success("User details updated successfully");
+      setEditIndex(-1); // Reset editIndex after saving
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
+  const handleEdit = (index) => {
+    setIsReadonly(false); // Enable editing
+    setEditIndex(index); // Set the index being edited
+  };
+
+  useEffect(() => {
+    getClients();
+  }, []);
+
+  useEffect(() => {
+    if (selector.length > 0) {
+      setTotalRows(selector.length);
+      setUserdata(selector);
+    }
+  }, [selector]);
+
+  return !Array.isArray(selector) || selector.length === 0 ? (
+    <ShimmerTable />
+  ) : (
+    <div>
+      <ToastContainer />
+      <div
+        className="text-black-600 text-right"
+        style={{ marginTop: "0rem", marginBottom: "2rem" }}
+      >
+        <b>Number Of Users - {totalRows}</b>
+      </div>
+      <div
+        onClick={() => dispatch(makeInvisible(false))}
+        className="bg-blue-800"
+      >
+        <table className="min-w-full bg-white border border-gray-300 shadow-lg">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="py-2 px-4 border-b">Name</th>
+              <th className="py-2 px-4 border-b">DOB</th>
+              <th className="py-2 px-4 border-b">Phone</th>
+              <th className="py-2 px-4 border-b">Email</th>
+              <th className="py-2 px-4 border-b">MemberShip Plan</th>
+              <th className="py-2 px-4 border-b">Amount</th>
+              <th className="py-2 px-4 border-b">Status</th>
+              <th className="py-2 px-4 border-b">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {selector.map((data, index) => {
+              return (
+                <tr
+                  className={`text-center my-10 ${
+                    index === editIndex ? "bg-indigo-200" : ""
+                  }`}
+                  key={index}
+                >
+                  <td className="py-2 px-4 border-b">
+                    <input
+                      type="text"
+                      value={userData[index]?.name}
+                      className="text-center w-full"
+                      readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+                      onChange={(e) =>
+                        handleInputChange(index, "name", e.target.value)
+                      }
+                    />
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    <input
+                      type="date"
+                      value={data?.dateOfBirth?.substr(0, 10)}
+                      className="text-center w-full"
+                      readOnly={isReadonly || index !== editIndex}
+                      onChange={(e) =>
+                        handleInputChange(index, "dateOfBirth", e.target.value)
+                      }
+                    />
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    <input
+                      type="text"
+                      value={formatPhoneNumber(userData[index]?.phone)}
+                      className="text-center w-full"
+                      readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+                      onChange={(e) =>
+                        handleInputChange(index, "phone", e.target.value)
+                      }
+                      placeholder="+91 1234567890" // Placeholder for formatting
+                    />
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    <input
+                      type="text"
+                      value={userData[index]?.email}
+                      className="text-center w-full"
+                      readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+                      onChange={(e) =>
+                        handleInputChange(index, "email", e.target.value)
+                      }
+                    />
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    <input
+                      type="text"
+                      value={data?.gymPlan ? data.gymPlan : data.plan}
+                      className="text-center w-full"
+                      readOnly
+                    />
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    <input
+                      type="number"
+                      value={userData[index]?.amount}
+                      className="text-center w-full"
+                      readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+                      onChange={(e) =>
+                        handleInputChange(index, "amount", e.target.value)
+                      }
+                    />
+                  </td>
+                  <td className="py-2 px-4 border-b text-green-600">Active</td>
+                  <td className="py-2 px-4 border-b relative">
+                    <div className="flex items-center justify-center space-x-2 group">
+                      <BsThreeDotsVertical className="cursor-pointer" />
+                      <div className="hidden group-hover:block absolute top-0 right-0 bg-white p-2 shadow-lg">
+                        <span
+                          className="hover:scale-110 duration-500 hover:shadow-xl cursor-pointer"
+                          onClick={() => handleDeleteUser(index)}
+                        >
+                          Delete
+                        </span>
+                        <div
+                          className="text-center cursor-pointer hover:scale-105 duration-700"
+                          onClick={() =>
+                            index === editIndex
+                              ? handleSave(index)
+                              : handleEdit(index)
+                          }
+                        >
+                          {isReadonly || index !== editIndex ? "Edit" : "Save"}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// Function to format phone number with country code
+const formatPhoneNumber = (phoneNumber) => {
+  if (!phoneNumber) return ""; // Return empty string if phoneNumber is undefined or null
+  if (typeof phoneNumber !== "string") return phoneNumber; // Return phoneNumber if it's not a string
+  if (phoneNumber.startsWith("+")) return phoneNumber; // Return phoneNumber if it already has country code
+  // Add '+' before the phone number
+  return `+${phoneNumber}`;
+};
+
+export { Table };
+
 // // show table will rendered after search in the table
 
 // import { ToastContainer, toast } from "react-toastify";
@@ -54,7 +307,7 @@
 //         `${apiURL}deleteclient/${id}`
 //       );
 //        // Update Redux store
-       
+
 //     dispatch(addClient(updatedClientsAfterDelete));
 //     // console.log("this is user after delete ",updatedClientsAfterDelete);
 //     setUserdata(updatedClientsAfterDelete);
@@ -95,8 +348,6 @@
 //     }
 //   };
 
-
-
 //   useEffect(() => {
 //     getClients();
 //   }, []);
@@ -105,7 +356,7 @@
 //     if (selector.length > 0) {
 //       setTotalRows(selector.length);
 //     }
-//   }, [selector]); 
+//   }, [selector]);
 
 //   return !Array.isArray(selector) || selector.length === 0 ? (
 //     <ShimmerTable />
@@ -212,214 +463,3 @@
 //     </div>
 //   );
 // };
-
-// export { Table }; // Named export of the Tables component
-import { ToastContainer, toast } from "react-toastify";
-import { ShimmerTable } from "../leftDashBoard/ShimmerTable";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
-import { addClient } from "../../redux/clientSlice";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { apiURL } from "../../utils/commonData";
-import { makeInvisible } from "../../redux/TemplateSlice";
-
-const Table = () => {
-  const selector = useSelector((store) => store.client.client);
-  const ownerId = useSelector((store) => store.user.userData?._id);
-  const dispatch = useDispatch();
-  const [dropdownVisible, setDropdownVisible] = useState(null);
-
-  const [userData, setUserdata] = useState(selector);
-  const [isReadonly, setIsReadonly] = useState(true);
-  const [totalRows, setTotalRows] = useState(0);
-  const [editIndex, setEditIndex] = useState(-1); // Track the index being edited
-
-  const getClients = async () => {
-    try {
-      const result = await axios.get(
-        `${apiURL}clients/${ownerId}`,
-        {
-          params: {
-            ownerId: ownerId,
-          },
-        }
-      );
-      const { message } = result.data;
-      dispatch(addClient(message));
-      if (!result) {
-        throw new Error(`error throw with status response`);
-      }
-      toast.success("Fetch The Users Data");
-    } catch (err) {
-      toast.error("Error Occurred while Fetching users data");
-    }
-  };
-
-  const handleDeleteUser = async (index) => {
-    if (userData[index] && userData[index]._id) { // Check if userData[index] exists and has _id property
-      const id = userData[index]._id;
-      try {
-        await axios.delete(`${apiURL}deleteclient/${id}`);
-        const updatedUsers = [...userData];
-        updatedUsers.splice(index, 1);
-        setUserdata(updatedUsers);
-        toast.success("User deleted successfully");
-      } catch (err) {
-        console.log(err.message);
-      }
-    } else {
-      console.log("User data or _id property is undefined");
-    }
-  };
-
-  const handleInputChange = (index, key, value) => {
-    setUserdata((prevUserData) => {
-      const updatedUserData = [...prevUserData];
-      updatedUserData[index] = { ...updatedUserData[index], [key]: value };
-      return updatedUserData;
-    });
-  };
-
-  const handleSave = async (index) => {
-    setIsReadonly(true); // Disable editing after save
-    const { _id, name, dateOfBirth, email, gymPlan, phone } = userData[index];
-    try {
-      await axios.put(`${apiURL}updateclient`, { _id, name, dateOfBirth, email, gymPlan, phone });
-      toast.success("User details updated successfully");
-      setEditIndex(-1); // Reset editIndex after saving
-    } catch (err) {
-      console.log(err.message);
-    }
-  };
-
-  const handleEdit = (index) => {
-    setIsReadonly(false); // Enable editing
-    setEditIndex(index); // Set the index being edited
-  };
-
-  useEffect(() => {
-    getClients();
-  }, []);
-
-  useEffect(() => {
-    if (selector.length > 0) {
-      setTotalRows(selector.length);
-    }
-  }, [selector]);
-
-  return !Array.isArray(selector) || selector.length === 0 ? (
-    <ShimmerTable />
-  ) : (
-    <div>
-      <div className="text-black-600 text-right" style={{ marginTop: '0rem', marginBottom: '2rem' }}><b>Number Of Users - {totalRows}</b></div>
-      <div onClick={()=>dispatch(makeInvisible(false))} className="bg-blue-800">
-        <table className="min-w-full bg-white border border-gray-300 shadow-lg">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="py-2 px-4 border-b">Name</th>
-              <th className="py-2 px-4 border-b">DOB</th>
-              <th className="py-2 px-4 border-b">Phone</th>
-              <th className="py-2 px-4 border-b">Email</th>
-              <th className="py-2 px-4 border-b">MemberShip Plan</th>
-              <th className="py-2 px-4 border-b">Status</th>
-              <th className="py-2 px-4 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {selector.map((data, index) => {
-              return (
-                <tr className={`text-center my-10 ${index === editIndex ? 'bg-indigo-200' : ''}`} key={index}>
-                  <td className="py-2 px-4 border-b">
-                    <input
-                      type="text"
-                      value={userData[index]?.name}
-                      className="text-center w-full"
-                      readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
-                      onChange={(e) =>
-                        handleInputChange(index, "name", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="py-2 px-4 border-b">
-                    <input
-                      type="date"
-                      value={data?.dateOfBirth?.substr(0,10)}
-                      className="text-center w-full"
-                      readOnly={isReadonly || index !== editIndex}
-                      onChange={(e) =>
-                        handleInputChange(index, "dateOfBirth", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="py-2 px-4 border-b">
-                    <input
-                      type="text"
-                      value={formatPhoneNumber(userData[index]?.phone)}
-                      className="text-center w-full"
-                      readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
-                      onChange={(e) =>
-                        handleInputChange(index, "phone", e.target.value)
-                      }
-                      placeholder="+91 1234567890" // Placeholder for formatting
-                    />
-                  </td>
-                  <td className="py-2 px-4 border-b">
-                    <input
-                      type="text"
-                      value={userData[index]?.email}
-                      className="text-center w-full"
-                      readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
-                      onChange={(e) =>
-                        handleInputChange(index, "email", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="py-2 px-4 border-b">
-                    <input
-                      type="text"
-                      value={data?.gymPlan?data.gymPlan:data.plan}
-                      className="text-center w-full"
-                      readOnly
-                    />
-                  </td>
-                  <td className="py-2 px-4 border-b text-green-600">Active</td>
-                  <td className="py-2 px-4 border-b relative">
-                    <div className="flex items-center justify-center space-x-2 group">
-                      <BsThreeDotsVertical className="cursor-pointer" />
-                      <div className="hidden group-hover:block absolute top-0 right-0 bg-white p-2 shadow-lg">
-                        <span
-                          className="hover:scale-110 duration-500 hover:shadow-xl cursor-pointer"
-                          onClick={() => handleDeleteUser(index)}
-                        >
-                          Delete
-                        </span>
-                        <div
-                          className="text-center cursor-pointer hover:scale-105 duration-700"
-                          onClick={() => index === editIndex ? handleSave(index) : handleEdit(index)}
-                        >
-                          {isReadonly || index !== editIndex ? "Edit" : "Save"}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-// Function to format phone number with country code
-const formatPhoneNumber = (phoneNumber) => {
-  if (!phoneNumber) return ''; // Return empty string if phoneNumber is undefined or null
-  if (typeof phoneNumber !== 'string') return phoneNumber; // Return phoneNumber if it's not a string
-  if (phoneNumber.startsWith('+')) return phoneNumber; // Return phoneNumber if it already has country code
-  // Add '+' before the phone number
-  return `+${phoneNumber}`;
-};
-
-export { Table };

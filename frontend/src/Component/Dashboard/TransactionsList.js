@@ -69,8 +69,7 @@ const TransactionsList = () => {
           <TransactionItem
             key={client._id}
             icon={<FaUser color="#00C9A7" />}
-            label={client.name}
-            title={client.email}
+            title={client.name}
             amount={calculateDaysLeft(client.registrationDate, client.gymPlan || client.plan)}
             type={calculateDaysLeft(client.registrationDate, client.gymPlan || client.plan) > 0 ? 'income' : 'expense'}
           />
@@ -80,6 +79,9 @@ const TransactionsList = () => {
   );
 };
 
+
+
+            // title={client.email}
 const styles = {
   container: {
     background: '#fff',
