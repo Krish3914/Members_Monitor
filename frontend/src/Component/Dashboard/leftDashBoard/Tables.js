@@ -20,6 +20,9 @@ const Table = () => {
   const [totalRows, setTotalRows] = useState(0);
   const [editIndex, setEditIndex] = useState(-1); // Track the index being edited
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
+
   const getClients = async () => {
     try {
       const result = await axios.get(`${apiURL}clients/${ownerId}`, {
@@ -71,7 +74,8 @@ const Table = () => {
 
   const handleSave = async (index) => {
     setIsReadonly(true); // Disable editing after save
-    const { _id, name, dateOfBirth, email, gymPlan, amount, phone } = userData[index];
+    const { _id, name, dateOfBirth, email, gymPlan, amount, phone } =
+      userData[index];
     try {
       await axios.put(`${apiURL}updateclient`, {
         _id,
@@ -84,6 +88,7 @@ const Table = () => {
       });
       toast.success("User details updated successfully");
       setEditIndex(-1); // Reset editIndex after saving
+      setDropdownVisible(null);
     } catch (err) {
       console.log(err.message);
     }
@@ -104,6 +109,14 @@ const Table = () => {
       setUserdata(selector);
     }
   }, [selector]);
+
+  // Calculate the current rows to display based on pagination
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = userData.slice(indexOfFirstRow, indexOfLastRow);
+
+  // Function to change the page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return !Array.isArray(selector) || selector.length === 0 ? (
     <ShimmerTable />
@@ -134,22 +147,23 @@ const Table = () => {
             </tr>
           </thead>
           <tbody>
-            {selector.map((data, index) => {
+            {currentRows.map((data, index) => {
+              const globalIndex = indexOfFirstRow + index; // Adjust index to match the original userData
               return (
                 <tr
                   className={`text-center my-10 ${
-                    index === editIndex ? "bg-indigo-200" : ""
+                    globalIndex === editIndex ? "bg-indigo-200" : ""
                   }`}
-                  key={index}
+                  key={globalIndex}
                 >
                   <td className="py-2 px-4 border-b">
                     <input
                       type="text"
-                      value={userData[index]?.name}
+                      value={userData[globalIndex]?.name}
                       className="text-center w-full"
-                      readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+                      readOnly={isReadonly || globalIndex !== editIndex} // Make editable only if index matches editIndex
                       onChange={(e) =>
-                        handleInputChange(index, "name", e.target.value)
+                        handleInputChange(globalIndex, "name", e.target.value)
                       }
                     />
                   </td>
@@ -158,20 +172,24 @@ const Table = () => {
                       type="date"
                       value={data?.dateOfBirth?.substr(0, 10)}
                       className="text-center w-full"
-                      readOnly={isReadonly || index !== editIndex}
+                      readOnly={isReadonly || globalIndex !== editIndex}
                       onChange={(e) =>
-                        handleInputChange(index, "dateOfBirth", e.target.value)
+                        handleInputChange(
+                          globalIndex,
+                          "dateOfBirth",
+                          e.target.value
+                        )
                       }
                     />
                   </td>
                   <td className="py-2 px-4 border-b">
                     <input
                       type="text"
-                      value={formatPhoneNumber(userData[index]?.phone)}
+                      value={formatPhoneNumber(userData[globalIndex]?.phone)}
                       className="text-center w-full"
-                      readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+                      readOnly={isReadonly || globalIndex !== editIndex} // Make editable only if index matches editIndex
                       onChange={(e) =>
-                        handleInputChange(index, "phone", e.target.value)
+                        handleInputChange(globalIndex, "phone", e.target.value)
                       }
                       placeholder="+91 1234567890" // Placeholder for formatting
                     />
@@ -179,11 +197,11 @@ const Table = () => {
                   <td className="py-2 px-4 border-b">
                     <input
                       type="text"
-                      value={userData[index]?.email}
+                      value={userData[globalIndex]?.email}
                       className="text-center w-full"
-                      readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+                      readOnly={isReadonly || globalIndex !== editIndex} // Make editable only if index matches editIndex
                       onChange={(e) =>
-                        handleInputChange(index, "email", e.target.value)
+                        handleInputChange(globalIndex, "email", e.target.value)
                       }
                     />
                   </td>
@@ -198,36 +216,50 @@ const Table = () => {
                   <td className="py-2 px-4 border-b">
                     <input
                       type="number"
-                      value={userData[index]?.amount}
+                      value={userData[globalIndex]?.amount}
                       className="text-center w-full"
-                      readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+                      readOnly={isReadonly || globalIndex !== editIndex} // Make editable only if index matches editIndex
                       onChange={(e) =>
-                        handleInputChange(index, "amount", e.target.value)
+                        handleInputChange(globalIndex, "amount", e.target.value)
                       }
                     />
                   </td>
                   <td className="py-2 px-4 border-b text-green-600">Active</td>
                   <td className="py-2 px-4 border-b relative">
                     <div className="flex items-center justify-center space-x-2 group">
-                      <BsThreeDotsVertical className="cursor-pointer" />
-                      <div className="hidden group-hover:block absolute top-0 right-0 bg-white p-2 shadow-lg">
-                        <span
-                          className="hover:scale-110 duration-500 hover:shadow-xl cursor-pointer"
-                          onClick={() => handleDeleteUser(index)}
-                        >
-                          Delete
-                        </span>
-                        <div
-                          className="text-center cursor-pointer hover:scale-105 duration-700"
-                          onClick={() =>
-                            index === editIndex
-                              ? handleSave(index)
-                              : handleEdit(index)
-                          }
-                        >
-                          {isReadonly || index !== editIndex ? "Edit" : "Save"}
+                      <BsThreeDotsVertical
+                        className="cursor-pointer"
+                        onClick={() => setDropdownVisible(globalIndex)}
+                      />
+                      {dropdownVisible === globalIndex && (
+                        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+                          <div
+                            className="cursor-pointer py-2 px-4 hover:bg-gray-100"
+                            onClick={() =>
+                              globalIndex === editIndex
+                                ? handleSave(globalIndex)
+                                : handleEdit(globalIndex)
+                            }
+                            // onClick={() => {
+                            //   handleEdit(globalIndex);
+                            //   setDropdownVisible(null);
+                            // }}
+                          >
+                            {isReadonly || globalIndex !== editIndex
+                              ? "Edit"
+                              : "Save"}
+                          </div>
+                          <div
+                            className="cursor-pointer py-2 px-4 hover:bg-gray-100"
+                            onClick={() => {
+                              handleDeleteUser(globalIndex);
+                              setDropdownVisible(null);
+                            }}
+                          >
+                            Delete
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -235,6 +267,24 @@ const Table = () => {
             })}
           </tbody>
         </table>
+      </div>
+      <div className="flex justify-center mt-4">
+        {Array.from(
+          { length: Math.ceil(totalRows / rowsPerPage) },
+          (_, index) => (
+            <button
+              key={index}
+              onClick={() => paginate(index + 1)}
+              className={`px-4 py-2 mx-1 border ${
+                currentPage === index + 1
+                  ? "bg-blue-500 text-white"
+                  : "bg-white"
+              }`}
+            >
+              {index + 1}
+            </button>
+          )
+        )}
       </div>
     </div>
   );
@@ -250,6 +300,200 @@ const formatPhoneNumber = (phoneNumber) => {
 };
 
 export { Table };
+
+
+// <td className="py-2 px-4 border-b relative">
+//   <div className="flex items-center justify-center space-x-2 group">
+//     <BsThreeDotsVertical className="cursor-pointer" />
+//     <div className="hidden group-hover:block absolute top-0 right-0 bg-white p-2 shadow-lg">
+//       <div
+//         className="text-center cursor-pointer hover:scale-105 duration-700"
+//         onClick={() =>
+//           globalIndex === editIndex
+//             ? handleSave(globalIndex)
+//             : handleEdit(globalIndex)
+//         }
+//       >
+//         {isReadonly || globalIndex !== editIndex ? "." : "Save"}
+//       </div>
+//       <span
+//         className="hover:scale-110 duration-500 hover:shadow-xl cursor-pointer"
+//         onClick={() => handleDeleteUser(globalIndex)}
+//       >
+//         Delete
+//       </span>
+//       <div
+//         className="text-center cursor-pointer hover:scale-105 duration-700"
+//         onClick={() =>
+//           globalIndex === editIndex
+//             ? handleSave(globalIndex)
+//             : handleEdit(globalIndex)
+//         }
+//       >
+//         {isReadonly || globalIndex !== editIndex ? "Edit" : "Save"}
+//       </div>
+//     </div>
+//   </div>
+// </td>;
+
+// group-hover:block
+
+//return function:-
+
+// return !Array.isArray(selector) || selector.length === 0 ? (
+//   <ShimmerTable />
+// ) : (
+//   <div>
+//     <ToastContainer />
+//     <div
+//       className="text-black-600 text-right"
+//       style={{ marginTop: "0rem", marginBottom: "2rem" }}
+//     >
+//       <b>Number Of Users - {totalRows}</b>
+//     </div>
+//     <div onClick={() => dispatch(makeInvisible(false))} className="bg-blue-800">
+//       <table className="min-w-full bg-white border border-gray-300 shadow-lg">
+//         <thead className="bg-gray-100">
+//           <tr>
+//             <th className="py-2 px-4 border-b">Name</th>
+//             <th className="py-2 px-4 border-b">DOB</th>
+//             <th className="py-2 px-4 border-b">Phone</th>
+//             <th className="py-2 px-4 border-b">Email</th>
+//             <th className="py-2 px-4 border-b">MemberShip Plan</th>
+//             <th className="py-2 px-4 border-b">Amount</th>
+//             <th className="py-2 px-4 border-b">Status</th>
+//             <th className="py-2 px-4 border-b">Actions</th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {selector.map((data, index) => {
+//             return (
+//               <tr
+//                 className={`text-center my-10 ${
+//                   index === editIndex ? "bg-indigo-200" : ""
+//                 }`}
+//                 key={index}
+//               >
+//                 <td className="py-2 px-4 border-b">
+//                   <input
+//                     type="text"
+//                     value={userData[index]?.name}
+//                     className="text-center w-full"
+//                     readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+//                     onChange={(e) =>
+//                       handleInputChange(index, "name", e.target.value)
+//                     }
+//                   />
+//                 </td>
+//                 <td className="py-2 px-4 border-b">
+//                   <input
+//                     type="date"
+//                     value={data?.dateOfBirth?.substr(0, 10)}
+//                     className="text-center w-full"
+//                     readOnly={isReadonly || index !== editIndex}
+//                     onChange={(e) =>
+//                       handleInputChange(index, "dateOfBirth", e.target.value)
+//                     }
+//                   />
+//                 </td>
+//                 <td className="py-2 px-4 border-b">
+//                   <input
+//                     type="text"
+//                     value={formatPhoneNumber(userData[index]?.phone)}
+//                     className="text-center w-full"
+//                     readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+//                     onChange={(e) =>
+//                       handleInputChange(index, "phone", e.target.value)
+//                     }
+//                     placeholder="+91 1234567890" // Placeholder for formatting
+//                   />
+//                 </td>
+//                 <td className="py-2 px-4 border-b">
+//                   <input
+//                     type="text"
+//                     value={userData[index]?.email}
+//                     className="text-center w-full"
+//                     readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+//                     onChange={(e) =>
+//                       handleInputChange(index, "email", e.target.value)
+//                     }
+//                   />
+//                 </td>
+//                 <td className="py-2 px-4 border-b">
+//                   <input
+//                     type="text"
+//                     value={data?.gymPlan ? data.gymPlan : data.plan}
+//                     className="text-center w-full"
+//                     readOnly
+//                   />
+//                 </td>
+//                 <td className="py-2 px-4 border-b">
+//                   <input
+//                     type="number"
+//                     value={userData[index]?.amount}
+//                     className="text-center w-full"
+//                     readOnly={isReadonly || index !== editIndex} // Make editable only if index matches editIndex
+//                     onChange={(e) =>
+//                       handleInputChange(index, "amount", e.target.value)
+//                     }
+//                   />
+//                 </td>
+//                 <td className="py-2 px-4 border-b text-green-600">Active</td>
+//                 <td className="py-2 px-4 border-b relative">
+//                   <div className="flex items-center justify-center space-x-2 group">
+//                     <BsThreeDotsVertical className="cursor-pointer" />
+//                     <div className="hidden group-hover:block absolute top-0 right-0 bg-white p-2 shadow-lg">
+//                       <span
+//                         className="hover:scale-110 duration-500 hover:shadow-xl cursor-pointer"
+//                         onClick={() => handleDeleteUser(index)}
+//                       >
+//                         Delete
+//                       </span>
+//                       <div
+//                         className="text-center cursor-pointer hover:scale-105 duration-700"
+//                         onClick={() =>
+//                           index === editIndex
+//                             ? handleSave(index)
+//                             : handleEdit(index)
+//                         }
+//                       >
+//                         {isReadonly || index !== editIndex ? "Edit" : "Save"}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </td>
+//               </tr>
+//             );
+//           })}
+//         </tbody>
+//       </table>
+//     </div>
+//   </div>
+// );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // // show table will rendered after search in the table
 
