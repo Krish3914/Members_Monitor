@@ -113,7 +113,6 @@ const Table = () => {
         gymPlan,
         amount,
         phone,
-        date,
       });
       toast.success("User details updated successfully");
       setEditIndex(-1); // Reset editIndex after saving
