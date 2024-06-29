@@ -115,7 +115,7 @@ const Table = () => {
         phone,
       });
       toast.success("User details updated successfully");
-      setEditIndex(-1); // Reset editIndex after saving
+      setEditIndex(-1); // Reset editIndex  after saving
       setDropdownVisible(null);
     } catch (err) {
       console.log(err.message);
