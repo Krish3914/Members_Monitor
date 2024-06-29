@@ -4,10 +4,11 @@ import { ShimmerTable } from "../leftDashBoard/ShimmerTable";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { addClient } from "../../redux/clientSlice";
+import { addClient, updateTodayPercentage } from "../../redux/clientSlice";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { apiURL } from "../../utils/commonData";
 import { makeInvisible } from "../../redux/TemplateSlice";
+
 
 const Table = () => {
   const selector = useSelector((store) => store.client.client);
@@ -46,23 +47,50 @@ const Table = () => {
     }
   };
 
+  // const handleDeleteUser = async (index) => {
+  //   if (userData[index] && userData[index]._id) {
+  //     // Check if userData[index] exists and has _id property
+  //     const id = userData[index]._id;
+  //     try {
+  //       const response = await axios.delete(`${apiURL}deleteclient/${id}`);
+  //       console.log("Server response:", response);
+        
+  //       const updatedUsers = [...userData];
+  //       updatedUsers.splice(index, 1);
+  //       setUserdata(updatedUsers);
+  //       toast.success("User deleted successfully");
+  //     } catch (err) {
+  //       console.log(err.message);
+  //     }
+  //   } else {
+  //     console.log("User data or _id property is undefined");
+  //   }
+  // };
   const handleDeleteUser = async (index) => {
     if (userData[index] && userData[index]._id) {
       // Check if userData[index] exists and has _id property
       const id = userData[index]._id;
       try {
-        await axios.delete(`${apiURL}deleteclient/${id}`);
-        const updatedUsers = [...userData];
-        updatedUsers.splice(index, 1);
-        setUserdata(updatedUsers);
-        toast.success("User deleted successfully");
+        const response = await axios.delete(`${apiURL}deleteclient/${id}`);
+        console.log("Delete response:", response); // Log the response to verify it's successful
+        if (response.status === 200) {
+          const updatedUsers = [...userData];
+          updatedUsers.splice(index, 1);
+          setUserdata(updatedUsers);
+          toast.success("User deleted successfully");
+        } else {
+          console.log("Failed to delete user:", response.status, response.data);
+          toast.error("Failed to delete user");
+        }
       } catch (err) {
-        console.log(err.message);
+        console.error("Error deleting user:", err.message, err.response);
+        toast.error("Error deleting user");
       }
     } else {
       console.log("User data or _id property is undefined");
     }
   };
+
 
   const handleInputChange = (index, key, value) => {
     setUserdata((prevUserData) => {
@@ -85,6 +113,7 @@ const Table = () => {
         gymPlan,
         amount,
         phone,
+        date,
       });
       toast.success("User details updated successfully");
       setEditIndex(-1); // Reset editIndex after saving
@@ -118,11 +147,56 @@ const Table = () => {
   // Function to change the page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  const calculateTodayPercentage = () => {
+    const today = new Date().toISOString().split("T")[0]; // Get the current date in YYYY-MM-DD format
+    const todayUsers = userData.filter((user) => user.addedDate === today);
+    const totalUsers = userData.length;
+
+    if (totalUsers === 0) return 0;
+    console.log("tud", todayUsers.length);
+    console.log("tu", totalUsers);
+    return ((todayUsers.length+1 / totalUsers) * 100).toFixed(2);
+  };
+
+
+  // const createUser = async (data) => {
+  //   const currentDate = new Date().toISOString().split("T")[0];
+  //   const realData = {
+  //     // ...existing fields
+  //     name: data.name,
+  //     dateOfBirth: data.dateOfBirth,
+  //     email: data.email,
+  //     gymPlan: data.gymPlan,
+  //     amount: data.amount,
+  //     phone: data.phone,
+  //     addedDate: currentDate,
+  //   };
+
+  //   try {
+  //     const savedRes = await axios.post(addTraineeurl, { ...realData });
+  //     if (savedRes.status !== 200) {
+  //       throw new Error(`Error with status response: ${savedRes.status}`);
+  //     }
+  //     toast.success("User Created Successfully");
+  //     dispatch(updateTodayPercentage()); // Dispatch after adding a user
+  //   } catch (err) {
+  //     toast.error("User Already Exists");
+  //   }
+  //   emptyForm();
+  // };
+
+  const handleUpdatePercentage = () => {
+    // Example usage of updateTodayPercentage action
+    dispatch(updateTodayPercentage(/* pass necessary payload if any */));
+  };
+
+
   return !Array.isArray(selector) || selector.length === 0 ? (
     <ShimmerTable />
   ) : (
     <div>
       <ToastContainer />
+      <div> hi this is : {calculateTodayPercentage()}%</div>
       <div
         className="text-black-600 text-right"
         style={{ marginTop: "0rem", marginBottom: "2rem" }}

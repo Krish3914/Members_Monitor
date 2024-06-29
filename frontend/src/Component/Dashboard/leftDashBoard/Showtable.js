@@ -1,6 +1,6 @@
 // show table will rendered after search in the table
 
-
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addClientSearch } from "../../redux/clientSlice";
 import { makeInvisible } from "../../redux/TemplateSlice";
@@ -98,3 +98,13 @@ export const Showtable = ()=>{
       </div>
     );
 }
+
+
+                  // <td className="py-2 px-4 border-b ">
+                  //   <input
+                  //     type="text"
+                  //     value={new Date()}
+                  //     className="text-center"
+                  //     readOnly
+                  //   />
+                  // </td>

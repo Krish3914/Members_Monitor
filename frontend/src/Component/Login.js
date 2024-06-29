@@ -25,19 +25,22 @@ export const Login = () => {
 
   const navigate = useNavigate();
 
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setLoader(false);
+  //   }, 1000);
+  // }, []);
   useEffect(() => {
-    setTimeout(() => {
-      setLoader(false);
-    }, 2000);
+    setLoader(false);
   }, []);
 
   const handleClose = () => {
+    setLoader(true);
     setTimeout(() => {
-      setLoader(true);
       console.log("loader load");
       setLoader(false);
-    }, 5000);
-    navigate("/");
+      navigate("/");
+    }, 1000);
   };
 
   const changeHandle = (event) => {
@@ -60,14 +63,20 @@ export const Login = () => {
 
       if (savedRes.status === 200) {
         const user = savedRes.data.user;
+        console.log("login 200");
+        // navigate("/dashboard/navbar");
         dispatch(addUserData(user));
         sessionStorage.setItem("token", savedRes.data.user.token);
+        // HTMLFormControlsCollection.log("login success");
         navigate("/dashboard/navbar");
+      } else {
+        console.error("Unexpected response status:", savedRes.status);
       }
     } catch (err) {
       toast.error(err.response?.data.message);
+    } finally {
+      setLoader(false);
     }
-    return false;
   };
 
   const signInHandle = (e) => {
@@ -76,6 +85,7 @@ export const Login = () => {
       if (!signInData.email || !signInData.password) {
         toast.warning("Please Fill All the details");
         throw new Error("some error");
+        return;
       }
 
       LoginUser(signInData);
