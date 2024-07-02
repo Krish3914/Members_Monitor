@@ -56,8 +56,15 @@ export const Navbar = () => {
   useEffect(() => {
     const fetchDailyVisits = async () => {
       try {
-        const response = await axios.get(`${apiURL}dailyVisits`);
-        setDailyVisits(response.data.visits);
+        const response = await axios.post(`${apiURL}log-visit`, null, {
+          headers: {
+            Referer: "https://membersmonitor.com",
+          },
+        });
+        console.log("Daily visits response:", response.data);
+        if (response.status === 200) {
+          setDailyVisits(response.data.visitRecord.count);
+        }
       } catch (error) {
         console.error("Error fetching daily visits:", error);
       }
@@ -65,6 +72,7 @@ export const Navbar = () => {
 
     fetchDailyVisits();
   }, []);
+
 
   useEffect(() => {
     toast.dismiss();
@@ -75,6 +83,8 @@ export const Navbar = () => {
     const totalProfit = userData.reduce((acc, user) => acc + user.amount, 0);
     setProfit(totalProfit);
   }, [userData]);
+
+  console.log("users:", dailyVisits);
 
   const calculatePercentage = () => {
     if (totalUsers === 0) return 0;
@@ -190,8 +200,14 @@ export const Navbar = () => {
                 <Link to={"/dashboard/transactioncard"}>
                   <h2 className="text-lg">New Members</h2>
                 </Link>
-                <span className="text-2xl font-medium opacity-65">0</span>
-                <span className="text-red-400">0%</span>
+                {
+                  role === "Admin" && (
+                  <div className="text-2xl font-medium opacity-65">
+                    {dailyVisits}
+                  </div>
+                  )
+                }
+                <span className="text-red-400">10%</span>
               </div>
             </div>
             <div className={cardClass}>
@@ -221,7 +237,7 @@ export const Navbar = () => {
                 </span>
               </div>
             </div>
-          </div> 
+          </div>
         </div>
         <div className="flex flex-col lg:flex-row gap-7">
           <OrderStatistics userData={userData} />
@@ -229,26 +245,31 @@ export const Navbar = () => {
           <TransactionsList />
         </div>
       </div>
-      {role === "Admin" && (
-        <div className="w-full flex justify-center items-center py-4">
-          <div className="relative impressive-background text-white py-0 px-8 md:px-16 lg:px-24 xl:px-32 2xl:px-40 w-full rounded-md shadow-md text-center">
-            <div className="absolute -inset-0.5 impressive-background opacity-50 rounded-md"></div>
-            <div className="relative z-10">
-              {" "}
-              <br />
-              <h3 className="text-lg font-semibold">
-                Number of Daily Visits:{" "}
-              </h3>
-              <p className="text-2xl font-bold">{dailyVisits}</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
 export default Navbar;
+
+
+
+      // {
+      //   role === "Admin" && (
+      //     <div className="w-full flex justify-center items-center py-4">
+      //       <div className="relative impressive-background text-white py-0 px-8 md:px-16 lg:px-24 xl:px-32 2xl:px-40 w-full rounded-md shadow-md text-center">
+      //         <div className="absolute -inset-0.5 impressive-background opacity-50 rounded-md"></div>
+      //         <div className="relative z-10">
+      //           {" "}
+      //           <br />
+      //           <h3 className="text-lg font-semibold">
+      //             Number of Daily Visits:{" "}
+      //           </h3>
+      //           <p className="text-2xl font-bold">{dailyVisits}</p>
+      //         </div>
+      //       </div>
+      //     </div>
+      //   );
+      // }
 
 // import { useDispatch, useSelector } from "react-redux";
 // import { Link } from "react-router-dom";
