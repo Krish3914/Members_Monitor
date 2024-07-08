@@ -38,7 +38,7 @@ export const Cards = ()=>{
             className="w-10"
           />
           <h2 className="opacity-60 font-normal text-lg">New Users</h2>
-          <span className="text-2xl font-medium opacity-60">12,628</span>
+          <span className="text-2xl font-medium opacity-60">12,728</span>
           <span className="text-green-500">78.2%</span>
         </div>
       </div>
