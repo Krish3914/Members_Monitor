@@ -1,5 +1,5 @@
 <h1>Cloning the Repository</h1>
-----------------------
+------------------------
 
 To host the backend server live on your Ubuntu terminal, you need to clone the repository from GitHub. Follow the steps below:
 
