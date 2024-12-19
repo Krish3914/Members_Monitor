@@ -33,7 +33,6 @@ import { EnterOtpToVerify } from "./Component/EnterOtpToVerify";
 import { updateVisibility } from "./Component/redux/TemplateSlice";
 
 
-
 const App = () => {
   
   return (
